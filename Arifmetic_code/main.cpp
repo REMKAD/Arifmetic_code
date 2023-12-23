@@ -10,30 +10,50 @@ void encodeAndWriteToFile(const char* inputFile, const char* outputFile, Arifmet
         return;
     }
 
-    String content;
-    char ch;
-    while (input.get(ch)) {
-        content.push_back(ch);
-        if (content.Get_length() >= 15) // Stop reading after 15 characters
-            break;
-    }
-    input.close();
-
-    content.push_back('!'); // Append '!' to the content
-
-    a.get_text(content, content.Get_length(), mode);
-    a.encode_text();
-    String encodedString = a.Get_encoded();
     std::ofstream output(outputFile, std::ios::binary);
     if (!output.is_open()) {
         std::cerr << "Failed to open output file" << std::endl;
+        input.close();
         return;
     }
 
-    for (int i = 0; i < encodedString.Get_length(); ++i) {
-        output << encodedString[i];
+    String content;
+    char ch;
+
+    while (input.get(ch)) {
+        content.push_back(ch);
+
+        if (content.Get_length() >= 5) {
+            content.push_back('!'); // Append '!' to the content
+            a.get_text(content, content.Get_length(), mode);
+            a.encode_text();
+            String encodedString = a.Get_encoded();
+
+            for (int i = 0; i < encodedString.Get_length(); ++i) {
+                output << encodedString[i];
+            }
+
+            output << ' '; // Separator between encoded segments
+
+            content = "";
+        }
     }
+
+    // Encode the remaining content
+    if (content.Get_length() > 0) {
+        content.push_back('!');
+        a.get_text(content, content.Get_length(), mode);
+        a.encode_text();
+        String encodedString = a.Get_encoded();
+
+        for (int i = 0; i < encodedString.Get_length(); ++i) {
+            output << encodedString[i];
+        }
+    }
+
+    input.close();
     output.close();
+    std::cout << "Done" << std::endl;
 }
 
 void decodeAndWriteToFile(const char* inputFile, const char* outputFile, Arifmetic_code& a) {
@@ -44,26 +64,44 @@ void decodeAndWriteToFile(const char* inputFile, const char* outputFile, Arifmet
         return;
     }
 
-    String encodedContent;
-    char ch;
-    while (input.get(ch)) {
-        encodedContent.push_back(ch);
-    }
-    input.close();
-    a.get_text(encodedContent, encodedContent.Get_length(), mode);
-    a.decode_text();
-    String decodedString = a.Get_decoded();
-    std::cout << decodedString << std::endl;
-    std::cout << decodedString << std::endl;
     std::ofstream output(outputFile);
     if (!output.is_open()) {
         std::cerr << "Failed to open output file" << std::endl;
+        input.close();
         return;
     }
 
-    for (int i = 0; i < decodedString.Get_length(); ++i) {
-        output << decodedString[i];
+    String encodedContent;
+    char ch;
+
+    while (input.get(ch)) {
+        if (ch != ' ') {
+            encodedContent.push_back(ch);
+        } else {
+            a.get_text(encodedContent, encodedContent.Get_length(), mode);
+            a.decode_text();
+            String decodedString = a.Get_decoded();
+
+            for (int i = 0; i < decodedString.Get_length(); ++i) {
+                output << decodedString[i];
+            }
+
+            encodedContent = "";
+        }
     }
+    if (encodedContent.Get_length() != 0) {
+            a.get_text(encodedContent, encodedContent.Get_length(), mode);
+            a.decode_text();
+            String decodedString = a.Get_decoded();
+
+            for (int i = 0; i < decodedString.Get_length(); ++i) {
+                output << decodedString[i];
+            }
+
+            encodedContent = "";
+            }
+
+    input.close();
     output.close();
 }
 
