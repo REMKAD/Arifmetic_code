@@ -1,4 +1,5 @@
 #include "Arifmetic_code.h"
+#include <limits>
 
 
 Arifmetic_code::Arifmetic_code()
@@ -22,13 +23,34 @@ void Arifmetic_code::encode_text()
     double limit_l = 0;
     double limit_r = 1;
     double last_one = 0;
+    double last_limit_l = 0;
+    double last_limit_r = 1;
     make_frequency_relative();
+    // Add this loop to print the elements in frequency_relative
+    std::cout << "Frequency Relative Elements:" << std::endl;
+    for (int i = 0; i < length_f; ++i) {
+        std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
+    }
+
     int k = 0;
     for (int i = 0; i < len_text; i++){
         make_intervals(limit_l, limit_r);
+        std::cout << "" << std::endl;
+
+        std::cout << "\tLimit_l: " << limit_l << "\tLimit_r: " << limit_r << std::endl;
+        // Print intervals for debugging or observation
+        std::cout << "Intervals: ";
+        for (int j = 0; j < length_f; j++) {
+            std::cout << intervals[j] << " ";
+        }
+        std::cout << std::endl;
+
+        
+
         for (int j = 0; j < length_f; j++){
+
             if (this->alphbt[j] == this->text[i]){
-                
+                std::cout << "\t" << this->alphbt[j] << std::endl;
                 if (j != 0) {
 
                     limit_r =  intervals[j];
@@ -40,10 +62,15 @@ void Arifmetic_code::encode_text()
                 break;
             }
         }
-        last_one = limit_l + (limit_r - limit_l) / 2;
-    
+        last_one = limit_l + (limit_r - limit_l) / 2; // why do you need last one?
+        std::cout << "\t limit_l, limit_r: " << limit_l << " " << limit_r << std::endl;
+        last_limit_l = limit_l;
+        last_limit_r = limit_r;
     }
-    this->encoded = int_to_bin(double_to_int(last_one));
+    this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(double_to_int(last_limit_l), double_to_int(last_limit_r)));
+    std::cout << "Encoded: " << double_to_int(last_limit_l) << std::endl;
+    std::cout << "Encoded: " << double_to_int(last_limit_r) << std::endl;
+    std::cout << "result: " << choose_the_shortest_number_in_the_interval(double_to_int(last_limit_l), double_to_int(last_limit_r)) << std::endl;
 }
 
 String Arifmetic_code::Get_encoded()
@@ -52,7 +79,7 @@ String Arifmetic_code::Get_encoded()
 }
 
 
-//Переписать декодирование залупа полная
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
 void Arifmetic_code::decode_text()
 {
@@ -176,7 +203,7 @@ void Arifmetic_code::get_text(const String& text, int len)
 }
 
 void Arifmetic_code::make_intervals(double lim_l, double lim_r)
-{
+{   
     if(lim_r == 1){
         for (int j = 0; j < length_f; j++) {
             intervals[j] = frequency_relative[j];
@@ -209,6 +236,22 @@ void Arifmetic_code::find_letter(double encoded_number)
             break;
         }
     }
+}
+
+long long Arifmetic_code::choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r)
+{
+    long long diff = lim_r - lim_l;
+    long long divisor = 1;
+
+    while (diff >= divisor) {
+        divisor *= 10;
+    }
+
+    divisor /= 10;
+    long long result = (lim_r - lim_r % divisor) / divisor; 
+
+    return result;
+    
 }
 
 String Arifmetic_code::int_to_bin(int num)
@@ -320,29 +363,31 @@ int Arifmetic_code::Get_int_digit(char digit)
     return result;
 }
 
-int Arifmetic_code::double_to_int(double num)
+long long Arifmetic_code::double_to_int(double num)
 {
-    int result = 0;
+    long long result = 0;
     int help = 0;
     int k = 0;
+    // std::cout << num << "  = num" << std::endl;
     while ((10 - num) != 10) {
-        //std::cout << 10 - num << "  = 10-num" << std::endl;
+        // std::cout << 10 - num << "  = 10-num" << std::endl;
         if ((10 - num) > 9) {
             if (k > 15) break;
             num *= 10;
           
             if (num < static_cast<double>(std::numeric_limits<int>::min()) || num > static_cast<double>(std::numeric_limits<int>::max())) {
-                std::cout << "Число находится за пределами диапазона целых чисел" << std::endl;
+                std::cout << "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ" << std::endl;
             }
             else {
                 help = static_cast<int>(num);
             }
             result *= 10;
             result += help;
-            //std::cout << num << " -   " << help << "   = num - help" << std::endl;
+            // std::cout << num << " -   " << help << "   = num - help" << std::endl;
             num -= help;
-
+            // std::cout << num << " - \t\t\t" << help << "   = num - help" << std::endl;
             help = 0;
+            // std::cout << "\n" << result << "\n" << std::endl;
             k++;
         }
         else {
@@ -351,6 +396,7 @@ int Arifmetic_code::double_to_int(double num)
             help = 0;
         }
     }
+    // std::cout << result << " result" << std::endl;
     return result;
 }
 

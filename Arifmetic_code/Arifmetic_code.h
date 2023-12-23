@@ -50,13 +50,14 @@ private:
     void make_intervals(double lim_l, double lim_r);
     void make_frequency_relative();
     void find_letter(double encoded_number);
+    long long choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r);
         //convertation
 
     String int_to_bin(int num);
     double bin_to_double(const String& text, int len);
     char Get_char_digit(int digit);
     int Get_int_digit(char digit);
-    int double_to_int(double num);
+    long long double_to_int(double num);
 
 };
 

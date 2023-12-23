@@ -16,7 +16,7 @@ int main() {
         std::cerr << "Failed to open one or both files" << std::endl;
     }
     
-    String S = "AAB";
+    String S = "ABAABAACA!";
     Arifmetic_code a;
     
     a.get_text(S, S.Get_length());

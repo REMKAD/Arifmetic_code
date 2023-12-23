@@ -132,7 +132,7 @@ int String::Get_length() {
 
 void String::writeToFile()
 {
-    std::ofstream outputFile("out.txt", 'w'); // Используем флаг ios::app
+    std::ofstream outputFile("out.txt", std::ios::out); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ ios::app
     if (outputFile.is_open()) {
         outputFile << this->str;
         outputFile.close();
