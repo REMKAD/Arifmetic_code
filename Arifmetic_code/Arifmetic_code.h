@@ -25,9 +25,8 @@ public:
 
         //text
 
-    void get_text(const String& text, int len);
+    void get_text(const String& text, int len, int& mode);
     int get_freq_size();
-
 
         //print variables 
 

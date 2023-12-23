@@ -83,18 +83,36 @@ String Arifmetic_code::Get_encoded()
 
 void Arifmetic_code::decode_text()
 {
-    double encoded_number = bin_to_double(encoded, encoded.Get_length());
-    int len_text = this->text.Get_length();
+    double encoded_number = bin_to_double(this->text, this->text.Get_length());
+    std::cout << "Encoded: " << encoded_number << std::endl;
+
+    int len_text = 0;
+    for (int j = 0; j < length_f - 1; j++) len_text += frequency[j];
+
+    
     double limit_l = 0;
     double limit_r = 1;
     double last_one = 0;
-    make_frequency_relative();
     int k = 0;
     for (int i = 0; i < len_text; i++) {
         make_intervals(limit_l, limit_r);
-        find_letter(encoded_number);
+
+        std::cout << "" << std::endl;
+
+        std::cout << "\tLimit_l: " << limit_l << "\tLimit_r: " << limit_r << std::endl;
+        // Print intervals for debugging or observation
+        std::cout << "Intervals: ";
         for (int j = 0; j < length_f; j++) {
-            if (this->alphbt[j] == this->text[i]) {
+            std::cout << intervals[j] << " ";
+        }
+        std::cout << std::endl;
+
+        find_letter(encoded_number);
+
+        for (int j = 0; j < length_f; j++) {
+            if (this->alphbt[j] == this->decoded[i]) {
+                std::cout << "\t" << this->alphbt[j] << std::endl;
+ 
                 if (j != 0) {
                     limit_r = intervals[j];
                     limit_l = intervals[j - 1];
@@ -103,13 +121,13 @@ void Arifmetic_code::decode_text()
                     limit_r = intervals[j];
                 }
                 break;
-                for (int z = 0; z < this->length_f; z++) std::cout <<"  intervals =" << intervals[z];
-                std::cout << std::endl;
             }
         }
     }
 
+
 }
+
 
 String Arifmetic_code::Get_decoded()
 {
@@ -137,67 +155,83 @@ void Arifmetic_code::print_freq_alphbt()
     }
 }
 
-void Arifmetic_code::get_text(const String& text, int len) 
-{
-    this->text = text;
-    int length = len;
-    bool truth = true;
-    this->alphbt.make_zero();
-    for (int i = 0; i < length; i++) {
-        int j = 0;
-        while (this->alphbt[j] != '\0') {
-            if (text[i] == this->alphbt[j]) {
-                truth = false;
+void Arifmetic_code::get_text(const String& text, int len, int& mode) 
+{   
+    if (mode == 0) {
+        this->text = text;
+        int length = len;
+        bool truth = true;
+        this->alphbt.make_zero();
+        for (int i = 0; i < length; i++) {
+            int j = 0;
+            while (this->alphbt[j] != '\0') {
+                if (text[i] == this->alphbt[j]) {
+                    truth = false;
+                
+                }
+                j++;
+            }
+            if (truth) {
+                this->alphbt.push_back(this->text[i]);
+            }
+            truth = true;
+        }
             
+        
+        this->length_f = this->alphbt.Get_length();
+        
+        if (this->frequency_relative != nullptr) {  
+            delete[] this->frequency_relative;
+            this->frequency_relative = nullptr; // Reset the pointer after deletion
+        } 
+        if (this->frequency != nullptr) delete this->frequency;
+    
+        
+
+        if (this->intervals != nullptr) delete this->intervals;
+        intervals = new double[this->length_f];
+        frequency = new double[this->length_f];
+        frequency_relative = new double[this->length_f] ;
+        for (int i = 0; i < this->length_f; i++) {
+            frequency[i] = 0;
+        }
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < this->length_f; j++) {
+                if (this->text[i] == this->alphbt[j]) {
+                    this->frequency[j] += 1;
+                }
             }
-            j++;
         }
-        if (truth) {
-            this->alphbt.push_back(this->text[i]);
+        for (int i = 0; i < this->length_f-1; i++) {
+            for (int j = i+1; j < this->length_f; j++) {
+                if (this->frequency[i] < this->frequency[j]) {
+                    int help = 0;
+                    char help_ch;
+                    help_ch = this->alphbt[i];
+                    help = this->frequency[i];
+                    this->alphbt[i] = this->alphbt[j];
+                    this->alphbt[j] = help_ch;
+                    this->frequency[i] = this->frequency[j];
+                    this->frequency[j] = help;
+                }
+                else if ((this->alphbt[i] > this->alphbt[j]) && (this->frequency[i] == this->frequency[j])) {
+                    int help = 0;
+                    char help_ch;
+                    help_ch = this->alphbt[i];
+                    help = this->frequency[i];
+                    this->alphbt[i] = this->alphbt[j];
+                    this->alphbt[j] = help_ch;
+                    this->frequency[i] = this->frequency[j];
+                    this->frequency[j] = help;
+                }
+                
+            }
         }
-        truth = true;
     }
-    this->length_f = this->alphbt.Get_length();
-    if (this->frequency != nullptr) delete this->frequency;
-    if (this->frequency_relative != nullptr) delete this->frequency_relative;
-    if (this->intervals != nullptr) delete this->intervals;
-    intervals = new double[this->length_f];
-    frequency = new double[this->length_f];
-    frequency_relative = new double[this->length_f] ;
-    for (int i = 0; i < this->length_f; i++) {
-        frequency[i] = 0;
-    }
-    for (int i = 0; i < length; i++) {
-        for (int j = 0; j < this->length_f; j++) {
-            if (this->text[i] == this->alphbt[j]) {
-                this->frequency[j] += 1;
-            }
-        }
-    }
-    for (int i = 0; i < this->length_f-1; i++) {
-        for (int j = i+1; j < this->length_f; j++) {
-            if (this->frequency[i] < this->frequency[j]) {
-                int help = 0;
-                char help_ch;
-                help_ch = this->alphbt[i];
-                help = this->frequency[i];
-                this->alphbt[i] = this->alphbt[j];
-                this->alphbt[j] = help_ch;
-                this->frequency[i] = this->frequency[j];
-                this->frequency[j] = help;
-            }
-            else if ((this->alphbt[i] > this->alphbt[j]) && (this->frequency[i] == this->frequency[j])) {
-                int help = 0;
-                char help_ch;
-                help_ch = this->alphbt[i];
-                help = this->frequency[i];
-                this->alphbt[i] = this->alphbt[j];
-                this->alphbt[j] = help_ch;
-                this->frequency[i] = this->frequency[j];
-                this->frequency[j] = help;
-            }
-            
-        }
+    else if (mode == 1) {
+        this->text = text;
+        if (this->intervals != nullptr) delete this->intervals;
+        std::cout << this->text << std::endl;
     }
     std::cout << this->text << std::endl;
 }
@@ -206,7 +240,11 @@ void Arifmetic_code::make_intervals(double lim_l, double lim_r)
 {   
     if(lim_r == 1){
         for (int j = 0; j < length_f; j++) {
+            if (j == 0) {
             intervals[j] = frequency_relative[j];
+            } else {
+                intervals[j] = intervals[j - 1] + frequency_relative[j];
+            }
         }
     }
     else {
@@ -233,13 +271,14 @@ void Arifmetic_code::find_letter(double encoded_number)
         {
             std::cout << intervals[i] << "=interval;  number=" << encoded_number << std::endl;
             decoded.push_back(this->alphbt[i]);
+
             break;
         }
     }
 }
 
 long long Arifmetic_code::choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r)
-{
+{   
     long long diff = lim_r - lim_l;
     long long divisor = 1;
 
@@ -251,7 +290,7 @@ long long Arifmetic_code::choose_the_shortest_number_in_the_interval(long long l
     long long result = (lim_r - lim_r % divisor) / divisor; 
 
     return result;
-    
+    std::cout << "double to int finish" << std::endl;
 }
 
 String Arifmetic_code::int_to_bin(int num)
