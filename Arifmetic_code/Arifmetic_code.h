@@ -1,5 +1,6 @@
 #pragma once
 #include "String.h"
+#include "vector"
 
 
 class Arifmetic_code
@@ -18,15 +19,20 @@ public:
     void encode_text();
     String Get_encoded();
 
+    void encodeAndWriteToFile(const char* inputFile, const char* outputFile);
+
         //decoding
 
-    void decode_text();
+    void decode_text(int len_symbols);
     String Get_decoded();
+    void decodeAndWriteToFile(const char* inputFile, const char* outputFile);
 
         //text
 
-    void get_text(const String& text, int len, int& mode);
+    void get_text(const String& text, int len, int iteration_index);
     int get_freq_size();
+
+    void get_encoded_text(const String& text, int iteration_index);
 
         //print variables 
 
@@ -46,13 +52,18 @@ private:
     double* frequency = nullptr;
     double* frequency_relative = nullptr;
     double* intervals = nullptr;
+
+    std::vector<double*> frequency_relative_array;
+    std::vector<String> alphbt_array;
+    int last_length_symbols = 0;
+
     void make_intervals(double lim_l, double lim_r);
     void make_frequency_relative();
     void find_letter(double encoded_number);
     long long choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r);
         //convertation
 
-    String int_to_bin(int num);
+    String int_to_bin(long long num);
     double bin_to_double(const String& text, int len);
     char Get_char_digit(int digit);
     int Get_int_digit(char digit);

@@ -13,8 +13,28 @@ Arifmetic_code::Arifmetic_code()
 }
 
 Arifmetic_code::~Arifmetic_code()
-{
+{   
+    std::cout << "Arifmetic_code::~Arifmetic_code()" << std::endl;
     if (this->frequency != nullptr) delete this->frequency;
+    if (this->intervals!= nullptr) delete this->intervals;
+    if (this->frequency_relative!= nullptr) delete this->frequency_relative;
+    std::cout << "Arifmetic_code::~Arifmetic_code() 2" << std::endl;
+
+    if (!this->frequency_relative_array.empty()) {
+        
+    for (auto& elem : this->frequency_relative_array) {
+        if (elem != nullptr) {
+            delete[] elem; 
+        }
+    }
+} else {
+    // Handle the case when the vector is already empty
+    std::cout << "The frequency_relative_array is already empty." << std::endl;
+}
+    std::cout << "Arifmetic_code::~Arifmetic_code()" << std::endl;
+    this->frequency_relative_array.clear();
+    this->alphbt_array.clear();
+    std::cout << "Arifmetic_code::~Arifmetic_code() end" << std::endl;
 }
 
 void Arifmetic_code::encode_text()
@@ -22,19 +42,24 @@ void Arifmetic_code::encode_text()
     int len_text = this->text.Get_length();
     double limit_l = 0;
     double limit_r = 1;
-    double last_one = 0;
-    double last_limit_l = 0;
-    double last_limit_r = 1;
     make_frequency_relative();
+    std::cout << this->alphbt << std::endl;
+    double* copied_frequency_relative = new double[this->length_f];
+    std::copy(frequency_relative, frequency_relative + this->length_f, copied_frequency_relative);
+    frequency_relative_array.push_back(copied_frequency_relative);
+    // PRINTING
     // Add this loop to print the elements in frequency_relative
     std::cout << "Frequency Relative Elements:" << std::endl;
     for (int i = 0; i < length_f; ++i) {
         std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
     }
+    // END OF PRINTING
 
     int k = 0;
     for (int i = 0; i < len_text; i++){
         make_intervals(limit_l, limit_r);
+
+        // PRINTING
         std::cout << "" << std::endl;
 
         std::cout << "\tLimit_l: " << limit_l << "\tLimit_r: " << limit_r << std::endl;
@@ -44,7 +69,7 @@ void Arifmetic_code::encode_text()
             std::cout << intervals[j] << " ";
         }
         std::cout << std::endl;
-
+        // END OF PRINTING
         
 
         for (int j = 0; j < length_f; j++){
@@ -62,15 +87,14 @@ void Arifmetic_code::encode_text()
                 break;
             }
         }
-        last_one = limit_l + (limit_r - limit_l) / 2; // why do you need last one?
         std::cout << "\t limit_l, limit_r: " << limit_l << " " << limit_r << std::endl;
-        last_limit_l = limit_l;
-        last_limit_r = limit_r;
     }
-    this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(double_to_int(last_limit_l), double_to_int(last_limit_r)));
-    std::cout << "Encoded: " << double_to_int(last_limit_l) << std::endl;
-    std::cout << "Encoded: " << double_to_int(last_limit_r) << std::endl;
-    std::cout << "result: " << choose_the_shortest_number_in_the_interval(double_to_int(last_limit_l), double_to_int(last_limit_r)) << std::endl;
+    this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(double_to_int(limit_l), double_to_int(limit_r)));
+
+    std::cout << "Encoded: " << double_to_int(limit_l) << std::endl;
+    std::cout << "Encoded: " << double_to_int(limit_r) << std::endl;
+    std::cout << "result: " << choose_the_shortest_number_in_the_interval(double_to_int(limit_l), double_to_int(limit_r)) << std::endl;
+    std::cout << "Encoded: " << this->encoded << std::endl;
 }
 
 String Arifmetic_code::Get_encoded()
@@ -81,15 +105,23 @@ String Arifmetic_code::Get_encoded()
 
 //���������� ������������� ������ ������
 
-void Arifmetic_code::decode_text()
-{
+void Arifmetic_code::decode_text(int len_symbols)
+{   
+    std::cout << this->text << std::endl;
     double encoded_number = bin_to_double(this->text, this->text.Get_length());
     std::cout << "Encoded: " << encoded_number << std::endl;
 
-    int len_text = 0;
-    for (int j = 0; j < length_f - 1; j++) len_text += frequency[j];
+    int len_text = len_symbols;
+    std::cout << this->alphbt << std::endl;
+    std::cout << len_text << std::endl;
+    // PRINTING
+    // Add this loop to print the elements in frequency_relative
+    std::cout << "Frequency Relative Elements:" << std::endl;
+    for (int i = 0; i < length_f; ++i) {
+        std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
+    }
+    // END OF PRINTING
 
-    
     double limit_l = 0;
     double limit_r = 1;
     double last_one = 0;
@@ -155,84 +187,228 @@ void Arifmetic_code::print_freq_alphbt()
     }
 }
 
-void Arifmetic_code::get_text(const String& text, int len, int& mode) 
-{   
-    if (mode == 0) {
-        this->text = text;
-        int length = len;
-        bool truth = true;
-        this->alphbt.make_zero();
-        for (int i = 0; i < length; i++) {
-            int j = 0;
-            while (this->alphbt[j] != '\0') {
-                if (text[i] == this->alphbt[j]) {
-                    truth = false;
-                
-                }
-                j++;
-            }
-            if (truth) {
-                this->alphbt.push_back(this->text[i]);
-            }
-            truth = true;
-        }
-            
-        
-        this->length_f = this->alphbt.Get_length();
-        
-        if (this->frequency_relative != nullptr) {  
-            delete[] this->frequency_relative;
-            this->frequency_relative = nullptr; // Reset the pointer after deletion
-        } 
-        if (this->frequency != nullptr) delete this->frequency;
-    
-        
+void Arifmetic_code::encodeAndWriteToFile(const char* inputFile, const char* outputFile)
+{
 
-        if (this->intervals != nullptr) delete this->intervals;
-        intervals = new double[this->length_f];
-        frequency = new double[this->length_f];
-        frequency_relative = new double[this->length_f] ;
-        for (int i = 0; i < this->length_f; i++) {
-            frequency[i] = 0;
+    std::ifstream input(inputFile);
+    if (!input.is_open()) {
+        std::cerr << "Failed to open input file" << std::endl;
+        return;
+    }
+
+    std::ofstream output(outputFile, std::ios::binary);
+    if (!output.is_open()) {
+        std::cerr << "Failed to open output file" << std::endl;
+        input.close();
+        return;
+    }
+
+    String content;
+    char ch;
+    int iter_index = 0;
+
+    while (input.get(ch)) {
+        std::cout << "1" << std::endl;
+        content.push_back(ch);
+        std::cout << "2" << std::endl;
+        if (content.Get_length() >= 9) {
+            content.push_back('!'); // Append '!' to the content
+            get_text(content, content.Get_length(), iter_index);
+            std::cout << "3" << std::endl;
+            encode_text();
+            std::cout << "4" << std::endl;
+
+            String encodedString = Get_encoded();
+            std::cout << "5" << std::endl;
+            for (int i = 0; i < encodedString.Get_length(); ++i) {
+                output << encodedString[i];
+            }
+            std::cout << "6" << std::endl;
+            output << ' '; // Separator between encoded segments
+            std::cout << "7" << std::endl;
+            content.print();
+            std::cout << content.Get_length() << std::endl;
+            content.make_zero();
+            std::cout << "8" << std::endl;
+            iter_index++;
         }
-        for (int i = 0; i < length; i++) {
-            for (int j = 0; j < this->length_f; j++) {
-                if (this->text[i] == this->alphbt[j]) {
-                    this->frequency[j] += 1;
-                }
+    }
+    std::cout << "9" << std::endl;
+    // Encode the remaining content
+    if (content.Get_length() > 0) {
+        this->last_length_symbols = content.Get_length();
+        content.push_back('!');
+        get_text(content, content.Get_length(), iter_index);
+        encode_text();
+        String encodedString = Get_encoded();
+
+        for (int i = 0; i < encodedString.Get_length(); ++i) {
+            output << encodedString[i];
+        }
+    }
+    std::cout << "MEAW2" << std::endl;
+    input.close();
+    output.close();
+    std::cout << "Done" << std::endl;
+    std::cout << "Elements in frequency_relative_array:" << std::endl;
+    for (const auto& ptr : this->frequency_relative_array) {
+        // Assuming the size of each array is known or stored separately
+        int size = frequency_relative_array.size(); // Change this to the actual size of your array
+
+        std::cout << "[";
+        for (int i = 0; i < size; ++i) {
+            std::cout << ptr[i];
+            if (i < size - 1) {
+                std::cout << ", ";
             }
         }
-        for (int i = 0; i < this->length_f-1; i++) {
-            for (int j = i+1; j < this->length_f; j++) {
-                if (this->frequency[i] < this->frequency[j]) {
-                    int help = 0;
-                    char help_ch;
-                    help_ch = this->alphbt[i];
-                    help = this->frequency[i];
-                    this->alphbt[i] = this->alphbt[j];
-                    this->alphbt[j] = help_ch;
-                    this->frequency[i] = this->frequency[j];
-                    this->frequency[j] = help;
-                }
-                else if ((this->alphbt[i] > this->alphbt[j]) && (this->frequency[i] == this->frequency[j])) {
-                    int help = 0;
-                    char help_ch;
-                    help_ch = this->alphbt[i];
-                    help = this->frequency[i];
-                    this->alphbt[i] = this->alphbt[j];
-                    this->alphbt[j] = help_ch;
-                    this->frequency[i] = this->frequency[j];
-                    this->frequency[j] = help;
-                }
-                
+        std::cout << "]" << std::endl;
+    }
+}
+
+
+void Arifmetic_code::decodeAndWriteToFile(const char* inputFile, const char* outputFile) {
+    std::ifstream input(inputFile, std::ios::binary);
+    if (!input.is_open()) {
+        std::cerr << "Failed to open input file" << std::endl;
+        return;
+    }
+
+    std::ofstream output(outputFile);
+    if (!output.is_open()) {
+        std::cerr << "Failed to open output file" << std::endl;
+        input.close();
+        return;
+    }
+    String encodedContent;
+    char ch;
+    int iter_index = 0;
+
+    while (input.get(ch)) {
+        if (ch != ' ') {
+            encodedContent.push_back(ch);
+        } else {
+            std::cout << "Encoded content" << encodedContent << std::endl;
+
+            get_encoded_text(encodedContent, iter_index);
+            decode_text(9);
+            String decodedString = Get_decoded();
+
+            for (int i = 0; i < decodedString.Get_length(); ++i) {
+                output << decodedString[i];
+            }
+
+            encodedContent = "";
+            iter_index++;
+        }
+    }
+    if (encodedContent.Get_length() != 0) {
+            
+            get_encoded_text(encodedContent, iter_index);
+            
+            decode_text(this->last_length_symbols);
+            String decodedString = Get_decoded();
+
+            for (int i = 0; i < decodedString.Get_length(); ++i) {
+                output << decodedString[i];
+            }
+
+            encodedContent = "";
+            }
+
+    input.close();
+    output.close();
+}
+
+void Arifmetic_code::get_encoded_text(const String& text, int iteration_index)
+{   
+    this->text = text;
+    std::cout <<  "text" <<this->text << std::endl;
+    this->alphbt = alphbt_array[iteration_index];
+    this->frequency_relative = frequency_relative_array[iteration_index];
+    this->length_f = this->alphbt.Get_length();
+    if (this->intervals != nullptr) delete this->intervals;
+    intervals = new double[this->length_f];
+    if (this->decoded.Get_length() != 0) this->decoded.make_zero();
+}
+void Arifmetic_code::get_text(const String& text, int len, int iteration_index) 
+{   
+    this->text = text;
+    int length = len;
+    bool truth = true;
+
+    
+    this->alphbt.make_zero();
+    for (int i = 0; i < length; i++) {
+        int j = 0;
+        while (this->alphbt[j] != '\0') {
+            if (text[i] == this->alphbt[j]) {
+                truth = false;
+            
+            }
+            j++;
+        }
+        if (truth) {
+            this->alphbt.push_back(this->text[i]);
+        }
+        truth = true;
+    }
+
+
+
+    if (this->frequency_relative != nullptr) {       
+        delete[] this->frequency_relative;
+        this->frequency_relative = nullptr; // Reset the pointer after deletion
+    } 
+
+    if (this->frequency != nullptr){ delete this->frequency; std::cout << "free frequency" << std::endl;}  
+    
+    this->length_f = this->alphbt.Get_length();
+    
+
+    
+
+    if (this->intervals != nullptr) delete this->intervals;
+    intervals = new double[this->length_f];
+    frequency = new double[this->length_f];
+    frequency_relative = new double[this->length_f] ;
+    for (int i = 0; i < this->length_f; i++) {
+        frequency[i] = 0;
+    }
+    for (int i = 0; i < length; i++) {
+        for (int j = 0; j < this->length_f; j++) {
+            if (this->text[i] == this->alphbt[j]) {
+                this->frequency[j] += 1;
             }
         }
     }
-    else if (mode == 1) {
-        this->text = text;
-        if (this->intervals != nullptr) delete this->intervals;
-        std::cout << this->text << std::endl;
+    for (int i = 0; i < this->length_f-1; i++) {
+        for (int j = i+1; j < this->length_f; j++) {
+            if (this->frequency[i] < this->frequency[j]) {
+                int help = 0;
+                char help_ch;
+                help_ch = this->alphbt[i];
+                help = this->frequency[i];
+                this->alphbt[i] = this->alphbt[j];
+                this->alphbt[j] = help_ch;
+                this->frequency[i] = this->frequency[j];
+                this->frequency[j] = help;
+            }
+            else if ((this->alphbt[i] > this->alphbt[j]) && (this->frequency[i] == this->frequency[j])) {
+                int help = 0;
+                char help_ch;
+                help_ch = this->alphbt[i];
+                help = this->frequency[i];
+                this->alphbt[i] = this->alphbt[j];
+                this->alphbt[j] = help_ch;
+                this->frequency[i] = this->frequency[j];
+                this->frequency[j] = help;
+            }
+            
+        }
     }
+
+    alphbt_array.push_back(this->alphbt);
     std::cout << this->text << std::endl;
 }
 
@@ -266,6 +442,7 @@ void Arifmetic_code::make_frequency_relative()
 
 void Arifmetic_code::find_letter(double encoded_number)
 {
+    std::cout << encoded_number << std::endl;
     for (int i = 0; i < length_f; i++) {
         if (intervals[i] > encoded_number)
         {
@@ -290,10 +467,9 @@ long long Arifmetic_code::choose_the_shortest_number_in_the_interval(long long l
     long long result = (lim_r - lim_r % divisor) / divisor; 
 
     return result;
-    std::cout << "double to int finish" << std::endl;
 }
 
-String Arifmetic_code::int_to_bin(int num)
+String Arifmetic_code::int_to_bin(long long num)
 {
     String encoded = "\0";
     int digit = 0;
@@ -310,8 +486,8 @@ String Arifmetic_code::int_to_bin(int num)
 double Arifmetic_code::bin_to_double(const String& text, int len)
 {
     double ten = 10;
-    int base = 1;
-    int result = 0;
+    long long base = 1;
+    long long result = 0;
     int help = 0;
     double result_to_return = 1;
     for (int i = len - 1; i >= 0; i--) {

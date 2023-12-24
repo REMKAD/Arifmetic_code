@@ -1,109 +1,7 @@
 #include <iostream>
 #include "String.h"
 #include "Arifmetic_code.h"
-
-void encodeAndWriteToFile(const char* inputFile, const char* outputFile, Arifmetic_code& a) {
-    int mode = 0; // 0 - encode, 1 - decode
-    std::ifstream input(inputFile);
-    if (!input.is_open()) {
-        std::cerr << "Failed to open input file" << std::endl;
-        return;
-    }
-
-    std::ofstream output(outputFile, std::ios::binary);
-    if (!output.is_open()) {
-        std::cerr << "Failed to open output file" << std::endl;
-        input.close();
-        return;
-    }
-
-    String content;
-    char ch;
-
-    while (input.get(ch)) {
-        content.push_back(ch);
-
-        if (content.Get_length() >= 5) {
-            content.push_back('!'); // Append '!' to the content
-            a.get_text(content, content.Get_length(), mode);
-            a.encode_text();
-            String encodedString = a.Get_encoded();
-
-            for (int i = 0; i < encodedString.Get_length(); ++i) {
-                output << encodedString[i];
-            }
-
-            output << ' '; // Separator between encoded segments
-
-            content = "";
-        }
-    }
-
-    // Encode the remaining content
-    if (content.Get_length() > 0) {
-        content.push_back('!');
-        a.get_text(content, content.Get_length(), mode);
-        a.encode_text();
-        String encodedString = a.Get_encoded();
-
-        for (int i = 0; i < encodedString.Get_length(); ++i) {
-            output << encodedString[i];
-        }
-    }
-
-    input.close();
-    output.close();
-    std::cout << "Done" << std::endl;
-}
-
-void decodeAndWriteToFile(const char* inputFile, const char* outputFile, Arifmetic_code& a) {
-    int mode = 1; // 0 - encode, 1 - decode
-    std::ifstream input(inputFile, std::ios::binary);
-    if (!input.is_open()) {
-        std::cerr << "Failed to open input file" << std::endl;
-        return;
-    }
-
-    std::ofstream output(outputFile);
-    if (!output.is_open()) {
-        std::cerr << "Failed to open output file" << std::endl;
-        input.close();
-        return;
-    }
-
-    String encodedContent;
-    char ch;
-
-    while (input.get(ch)) {
-        if (ch != ' ') {
-            encodedContent.push_back(ch);
-        } else {
-            a.get_text(encodedContent, encodedContent.Get_length(), mode);
-            a.decode_text();
-            String decodedString = a.Get_decoded();
-
-            for (int i = 0; i < decodedString.Get_length(); ++i) {
-                output << decodedString[i];
-            }
-
-            encodedContent = "";
-        }
-    }
-    if (encodedContent.Get_length() != 0) {
-            a.get_text(encodedContent, encodedContent.Get_length(), mode);
-            a.decode_text();
-            String decodedString = a.Get_decoded();
-
-            for (int i = 0; i < decodedString.Get_length(); ++i) {
-                output << decodedString[i];
-            }
-
-            encodedContent = "";
-            }
-
-    input.close();
-    output.close();
-}
+#include <vector>
 
 
 int main() {
@@ -113,9 +11,12 @@ int main() {
     const char* decodedFile = "decoded.txt"; // Change this to your decoded file name
 
     Arifmetic_code a;
-    encodeAndWriteToFile(inputFile, encodedFile, a);
-    decodeAndWriteToFile(encodedFile, decodedFile, a);
+    a.encodeAndWriteToFile(inputFile, encodedFile);
 
+    
+
+    a.decodeAndWriteToFile(encodedFile, decodedFile);
+    
 
     return 0;
 }
