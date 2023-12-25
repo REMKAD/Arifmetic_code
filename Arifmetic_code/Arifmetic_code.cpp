@@ -21,7 +21,8 @@ Arifmetic_code::~Arifmetic_code()
     std::cout << "Arifmetic_code::~Arifmetic_code() 2" << std::endl;
 
     if (!this->frequency_relative_array.empty()) {
-        
+
+    // problem is with the deletion of the element here... 
     for (auto& elem : this->frequency_relative_array) {
         if (elem != nullptr) {
             delete[] elem; 
@@ -31,9 +32,10 @@ Arifmetic_code::~Arifmetic_code()
     // Handle the case when the vector is already empty
     std::cout << "The frequency_relative_array is already empty." << std::endl;
 }
-    std::cout << "Arifmetic_code::~Arifmetic_code()" << std::endl;
+    std::cout << "Arifmetic_code::~Arifmetic_code() 55" << std::endl;
     this->frequency_relative_array.clear();
     this->alphbt_array.clear();
+    this->zeros_in_the_initial_double.clear();
     std::cout << "Arifmetic_code::~Arifmetic_code() end" << std::endl;
 }
 
@@ -47,17 +49,13 @@ void Arifmetic_code::encode_text()
     double* copied_frequency_relative = new double[this->length_f];
     std::copy(frequency_relative, frequency_relative + this->length_f, copied_frequency_relative);
     frequency_relative_array.push_back(copied_frequency_relative);
-    // PRINTING
-    // Add this loop to print the elements in frequency_relative
-    std::cout << "Frequency Relative Elements:" << std::endl;
-    for (int i = 0; i < length_f; ++i) {
-        std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
-    }
-    // END OF PRINTING
+    print_freq_alphbt();
+
 
     int k = 0;
     for (int i = 0; i < len_text; i++){
-        make_intervals(limit_l, limit_r);
+
+        make_intervals(limit_l, limit_r, i);
 
         // PRINTING
         std::cout << "" << std::endl;
@@ -87,14 +85,11 @@ void Arifmetic_code::encode_text()
                 break;
             }
         }
-        std::cout << "\t limit_l, limit_r: " << limit_l << " " << limit_r << std::endl;
     }
-    this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(double_to_int(limit_l), double_to_int(limit_r)));
+    this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(limit_l, limit_r));
+    std::cout << "\t" << double_to_int(limit_l) << std::endl;
+    std::cout << "\t" << double_to_int(limit_r) << std::endl;
 
-    std::cout << "Encoded: " << double_to_int(limit_l) << std::endl;
-    std::cout << "Encoded: " << double_to_int(limit_r) << std::endl;
-    std::cout << "result: " << choose_the_shortest_number_in_the_interval(double_to_int(limit_l), double_to_int(limit_r)) << std::endl;
-    std::cout << "Encoded: " << this->encoded << std::endl;
 }
 
 String Arifmetic_code::Get_encoded()
@@ -105,29 +100,32 @@ String Arifmetic_code::Get_encoded()
 
 //���������� ������������� ������ ������
 
-void Arifmetic_code::decode_text(int len_symbols)
+void Arifmetic_code::decode_text(int len_symbols, int iter_index)
 {   
     std::cout << this->text << std::endl;
     double encoded_number = bin_to_double(this->text, this->text.Get_length());
+
+    int amount_zeros = this->zeros_in_the_initial_double[iter_index]; 
+    while (amount_zeros > 0) {encoded_number /= 10; amount_zeros--;};
     std::cout << "Encoded: " << encoded_number << std::endl;
 
     int len_text = len_symbols;
     std::cout << this->alphbt << std::endl;
     std::cout << len_text << std::endl;
     // PRINTING
-    // Add this loop to print the elements in frequency_relative
-    std::cout << "Frequency Relative Elements:" << std::endl;
-    for (int i = 0; i < length_f; ++i) {
-        std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
-    }
-    // END OF PRINTING
+    // // Add this loop to print the elements in frequency_relative
+    // std::cout << "Frequency Relative Elements:" << std::endl;
+    // for (int i = 0; i < length_f; ++i) {
+    //     std::cout << "frequency_relative[" << i << "]: " << frequency_relative[i] << std::endl;
+    // }
+    // // END OF PRINTING
 
     double limit_l = 0;
     double limit_r = 1;
     double last_one = 0;
     int k = 0;
     for (int i = 0; i < len_text; i++) {
-        make_intervals(limit_l, limit_r);
+        make_intervals(limit_l, limit_r, i);
 
         std::cout << "" << std::endl;
 
@@ -208,32 +206,32 @@ void Arifmetic_code::encodeAndWriteToFile(const char* inputFile, const char* out
     int iter_index = 0;
 
     while (input.get(ch)) {
-        std::cout << "1" << std::endl;
+        
         content.push_back(ch);
-        std::cout << "2" << std::endl;
+        
         if (content.Get_length() >= 9) {
             content.push_back('!'); // Append '!' to the content
             get_text(content, content.Get_length(), iter_index);
-            std::cout << "3" << std::endl;
+            
             encode_text();
-            std::cout << "4" << std::endl;
+            
 
             String encodedString = Get_encoded();
-            std::cout << "5" << std::endl;
+            
             for (int i = 0; i < encodedString.Get_length(); ++i) {
                 output << encodedString[i];
             }
-            std::cout << "6" << std::endl;
+            
             output << ' '; // Separator between encoded segments
-            std::cout << "7" << std::endl;
+            
             content.print();
-            std::cout << content.Get_length() << std::endl;
+            
             content.make_zero();
-            std::cout << "8" << std::endl;
+            
             iter_index++;
         }
     }
-    std::cout << "9" << std::endl;
+    
     // Encode the remaining content
     if (content.Get_length() > 0) {
         this->last_length_symbols = content.Get_length();
@@ -246,11 +244,11 @@ void Arifmetic_code::encodeAndWriteToFile(const char* inputFile, const char* out
             output << encodedString[i];
         }
     }
-    std::cout << "MEAW2" << std::endl;
+    
     input.close();
     output.close();
-    std::cout << "Done" << std::endl;
-    std::cout << "Elements in frequency_relative_array:" << std::endl;
+    
+    
     for (const auto& ptr : this->frequency_relative_array) {
         // Assuming the size of each array is known or stored separately
         int size = frequency_relative_array.size(); // Change this to the actual size of your array
@@ -288,10 +286,9 @@ void Arifmetic_code::decodeAndWriteToFile(const char* inputFile, const char* out
         if (ch != ' ') {
             encodedContent.push_back(ch);
         } else {
-            std::cout << "Encoded content" << encodedContent << std::endl;
 
             get_encoded_text(encodedContent, iter_index);
-            decode_text(9);
+            decode_text(9, iter_index);
             String decodedString = Get_decoded();
 
             for (int i = 0; i < decodedString.Get_length(); ++i) {
@@ -306,7 +303,7 @@ void Arifmetic_code::decodeAndWriteToFile(const char* inputFile, const char* out
             
             get_encoded_text(encodedContent, iter_index);
             
-            decode_text(this->last_length_symbols);
+            decode_text(this->last_length_symbols, iter_index);
             String decodedString = Get_decoded();
 
             for (int i = 0; i < decodedString.Get_length(); ++i) {
@@ -323,7 +320,6 @@ void Arifmetic_code::decodeAndWriteToFile(const char* inputFile, const char* out
 void Arifmetic_code::get_encoded_text(const String& text, int iteration_index)
 {   
     this->text = text;
-    std::cout <<  "text" <<this->text << std::endl;
     this->alphbt = alphbt_array[iteration_index];
     this->frequency_relative = frequency_relative_array[iteration_index];
     this->length_f = this->alphbt.Get_length();
@@ -412,9 +408,9 @@ void Arifmetic_code::get_text(const String& text, int len, int iteration_index)
     std::cout << this->text << std::endl;
 }
 
-void Arifmetic_code::make_intervals(double lim_l, double lim_r)
+void Arifmetic_code::make_intervals(double lim_l, double lim_r, int index)
 {   
-    if(lim_r == 1){
+    if((lim_r == 1) & (index == 0)){
         for (int j = 0; j < length_f; j++) {
             if (j == 0) {
             intervals[j] = frequency_relative[j];
@@ -454,18 +450,89 @@ void Arifmetic_code::find_letter(double encoded_number)
     }
 }
 
-long long Arifmetic_code::choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r)
+long long Arifmetic_code::choose_the_shortest_number_in_the_interval(double lim_l, double lim_r)
 {   
-    long long diff = lim_r - lim_l;
-    long long divisor = 1;
 
-    while (diff >= divisor) {
-        divisor *= 10;
+    long long result = 0;
+    int help1 = 0;
+    int help2 = 0;
+    int k = 0;
+    bool starts_with_zero = true;
+    double num1 = lim_l;
+    double num2 = lim_r;
+    int zero_count = 0;
+
+    // std::cout << "\n" << std::endl;
+    // std::cout << num1 << "  = num1" << std::endl;
+    // std::cout << num2 << "  = num2" << std::endl;
+    while (((10 - num1) != 10) && ((10 - num2) != 10)) {
+        // std::cout << 10 - num1 << "  = 10-num1" << std::endl;
+        // std::cout << 10 - num2 << "  = 10-num2" << std::endl;
+        if (((10 - num1) > 9) & ((10 - num2) > 9)) {
+            if (k > 15) break;
+            num1 *= 10;
+            num2 *= 10;
+          
+            if (num1 < static_cast<double>(std::numeric_limits<int>::min()) || num1 > static_cast<double>(std::numeric_limits<int>::max())) {
+                std::cout << "����� ��������� �� ��������� ��������� ����� �����" << std::endl;
+            }
+            else {
+                help1 = static_cast<int>(num1);
+            }
+            
+            if (num2 < static_cast<double>(std::numeric_limits<int>::min()) || num2 > static_cast<double>(std::numeric_limits<int>::max())) {
+                std::cout << "����� ��������� �� ��������� ��������� ����� �����" << std::endl;
+            }
+            else {
+                help2 = static_cast<int>(num2);
+            }
+
+            // std::cout << "first number form num1: " << help1 << " first number from num2: " << help2 << std::endl;
+            if (help1 == help2) 
+            {
+                if (help1 == 0) 
+                {
+                    if (starts_with_zero == true) { zero_count++;}
+                    result *= 10;
+                    result += help1;
+                }
+                else
+                {   
+                    starts_with_zero = false;
+                    result *= 10;
+                    result += help1;
+                }
+            }
+            else
+            {
+                result *= 10;
+                result += help2;
+                break;
+            }
+
+            // std::cout << num1 << " -   " << help1 << "   = num1 - help1" << std::endl;
+            num1 -= help1;
+            num2 -= help2;
+            // std::cout << num1 << " - \t\t\t" << help1 << "   = num1 - help1" << std::endl;
+            help1 = 0;
+            help2 = 0;
+            // std::cout << "\n" << result << "\n" << std::endl;
+            k++;
+        }
+        else {
+            help1 = static_cast<int>(num1);
+            num1 -= help1;
+            
+            help2 = static_cast<int>(num2);
+            num2 -= help2;
+
+            help1 = 0;
+            help2 = 0;
+        }
     }
-
-    divisor /= 10;
-    long long result = (lim_r - lim_r % divisor) / divisor; 
-
+    std::cout << result << " result" << std::endl;
+    std::cout << zero_count << " zero_count" << std::endl;
+    zeros_in_the_initial_double.push_back(zero_count);
     return result;
 }
 

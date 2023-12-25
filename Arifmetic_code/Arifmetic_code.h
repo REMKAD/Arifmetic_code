@@ -23,7 +23,7 @@ public:
 
         //decoding
 
-    void decode_text(int len_symbols);
+    void decode_text(int len_symbols, int iter_index);
     String Get_decoded();
     void decodeAndWriteToFile(const char* inputFile, const char* outputFile);
 
@@ -55,12 +55,13 @@ private:
 
     std::vector<double*> frequency_relative_array;
     std::vector<String> alphbt_array;
+    std::vector<int> zeros_in_the_initial_double; // !!!!!!!!!!! in deconstructor nothing is done for memory allocation !!!!!!!!!!!!!!
     int last_length_symbols = 0;
 
-    void make_intervals(double lim_l, double lim_r);
+    void make_intervals(double lim_l, double lim_r, int index);
     void make_frequency_relative();
     void find_letter(double encoded_number);
-    long long choose_the_shortest_number_in_the_interval(long long lim_l, long long lim_r);
+    long long choose_the_shortest_number_in_the_interval(double lim_l, double lim_r);
         //convertation
 
     String int_to_bin(long long num);
