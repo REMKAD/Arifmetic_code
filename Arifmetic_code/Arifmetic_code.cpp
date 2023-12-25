@@ -14,29 +14,32 @@ Arifmetic_code::Arifmetic_code()
 
 Arifmetic_code::~Arifmetic_code()
 {   
-    std::cout << "Arifmetic_code::~Arifmetic_code()" << std::endl;
+    std::cout << "Arifmetic_code::~Arifmetic_code() 0" << std::endl;
+    // NEW
+    // ERROR почему-то удаление происходит повторно, но ты и так не будешь использовать вектор
+    if (!this->frequency_relative_array.empty()) {
+        for (auto& elem : this->frequency_relative_array) {
+            if (elem != nullptr) {
+                delete[] elem; 
+            }
+        }
+    }    
+    else {
+    // Handle the case when the vector is already empty
+    std::cout << "The frequency_relative_array is already empty." << std::endl;
+    }
+
+    std::cout << "Arifmetic_code::~Arifmetic_code() 1" << std::endl;
     if (this->frequency != nullptr) delete this->frequency;
     if (this->intervals!= nullptr) delete this->intervals;
     if (this->frequency_relative!= nullptr) delete this->frequency_relative;
     std::cout << "Arifmetic_code::~Arifmetic_code() 2" << std::endl;
-
-    if (!this->frequency_relative_array.empty()) {
-
-    // problem is with the deletion of the element here... 
-    for (auto& elem : this->frequency_relative_array) {
-        if (elem != nullptr) {
-            delete[] elem; 
-        }
-    }
-} else {
-    // Handle the case when the vector is already empty
-    std::cout << "The frequency_relative_array is already empty." << std::endl;
-}
-    std::cout << "Arifmetic_code::~Arifmetic_code() 55" << std::endl;
+    // NEW
+    std::cout << "Arifmetic_code::~Arifmetic_code() 3" << std::endl;
     this->frequency_relative_array.clear();
     this->alphbt_array.clear();
     this->zeros_in_the_initial_double.clear();
-    std::cout << "Arifmetic_code::~Arifmetic_code() end" << std::endl;
+    std::cout << "Arifmetic_code::~Arifmetic_code() 4" << std::endl;
 }
 
 void Arifmetic_code::encode_text()
@@ -45,29 +48,30 @@ void Arifmetic_code::encode_text()
     double limit_l = 0;
     double limit_r = 1;
     make_frequency_relative();
-    std::cout << this->alphbt << std::endl;
+
+    // NEW
     double* copied_frequency_relative = new double[this->length_f];
     std::copy(frequency_relative, frequency_relative + this->length_f, copied_frequency_relative);
     frequency_relative_array.push_back(copied_frequency_relative);
-    print_freq_alphbt();
 
+    print_freq_alphbt();
 
     int k = 0;
     for (int i = 0; i < len_text; i++){
 
         make_intervals(limit_l, limit_r, i);
 
-        // PRINTING
-        std::cout << "" << std::endl;
+        // // PRINT
+        // std::cout << "" << std::endl;
 
-        std::cout << "\tLimit_l: " << limit_l << "\tLimit_r: " << limit_r << std::endl;
-        // Print intervals for debugging or observation
-        std::cout << "Intervals: ";
-        for (int j = 0; j < length_f; j++) {
-            std::cout << intervals[j] << " ";
-        }
-        std::cout << std::endl;
-        // END OF PRINTING
+        // std::cout << "\tLimit_l: " << limit_l << "\tLimit_r: " << limit_r << std::endl;
+        // // Print intervals for debugging or observation
+        // std::cout << "Intervals: ";
+        // for (int j = 0; j < length_f; j++) {
+        //     std::cout << intervals[j] << " ";
+        // }
+        // std::cout << std::endl;
+        // // END OF PRINTING
         
 
         for (int j = 0; j < length_f; j++){
@@ -86,9 +90,13 @@ void Arifmetic_code::encode_text()
             }
         }
     }
+
+    // NEW
     this->encoded = int_to_bin(choose_the_shortest_number_in_the_interval(limit_l, limit_r));
-    std::cout << "\t" << double_to_int(limit_l) << std::endl;
-    std::cout << "\t" << double_to_int(limit_r) << std::endl;
+
+    // JUST FOR DEBUGGING
+    std::cout << "double to int num 1: \t " << double_to_int(limit_l) << std::endl;
+    std::cout << "double to int num 2: \t " << double_to_int(limit_r) << std::endl;
 
 }
 
@@ -319,6 +327,7 @@ void Arifmetic_code::decodeAndWriteToFile(const char* inputFile, const char* out
 
 void Arifmetic_code::get_encoded_text(const String& text, int iteration_index)
 {   
+    // NEW
     this->text = text;
     this->alphbt = alphbt_array[iteration_index];
     this->frequency_relative = frequency_relative_array[iteration_index];
@@ -349,7 +358,6 @@ void Arifmetic_code::get_text(const String& text, int len, int iteration_index)
         }
         truth = true;
     }
-
 
 
     if (this->frequency_relative != nullptr) {       
@@ -404,6 +412,7 @@ void Arifmetic_code::get_text(const String& text, int len, int iteration_index)
         }
     }
 
+    // NEW
     alphbt_array.push_back(this->alphbt);
     std::cout << this->text << std::endl;
 }
@@ -452,7 +461,8 @@ void Arifmetic_code::find_letter(double encoded_number)
 
 long long Arifmetic_code::choose_the_shortest_number_in_the_interval(double lim_l, double lim_r)
 {   
-
+    // EVERYTHING
+    // NEW
     long long result = 0;
     int help1 = 0;
     int help2 = 0;
@@ -530,6 +540,7 @@ long long Arifmetic_code::choose_the_shortest_number_in_the_interval(double lim_
             help2 = 0;
         }
     }
+
     std::cout << result << " result" << std::endl;
     std::cout << zero_count << " zero_count" << std::endl;
     zeros_in_the_initial_double.push_back(zero_count);
@@ -609,7 +620,7 @@ char Arifmetic_code::Get_char_digit(int digit)
             std::cout << "not binary output" << std::endl;
             break;
         case 9:
-            char_digit = '0';
+            char_digit = '9';
             std::cout << "not binary output" << std::endl;
             break;
         case 0:
