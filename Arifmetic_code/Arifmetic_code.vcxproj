@@ -140,14 +140,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Arifmetic_code.h" />
+    <ClInclude Include="Arrays.h" />
     <ClInclude Include="String.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arifmetic_code.cpp" />
+    <ClCompile Include="Arrays.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="String.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="hey.txt" />
     <Text Include="in_1.txt" />
     <Text Include="in_2.txt" />
     <Text Include="out.txt" />

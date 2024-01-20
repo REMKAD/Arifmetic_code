@@ -36,6 +36,7 @@ public:
     int Get_length();
     void writeToFile();
     void print();
+    void set_length(int len);
 
         //operators
     char& operator[](int indx); //indexof string[10]=?

@@ -17,6 +17,9 @@
     <ClInclude Include="Arifmetic_code.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Arrays.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="String.cpp">
@@ -28,6 +31,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Arrays.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in_1.txt">
@@ -37,5 +43,6 @@
       <Filter>Файлы заголовков</Filter>
     </Text>
     <Text Include="out.txt" />
+    <Text Include="hey.txt" />
   </ItemGroup>
 </Project>

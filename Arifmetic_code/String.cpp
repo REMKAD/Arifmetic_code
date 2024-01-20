@@ -1,4 +1,4 @@
-#include "String.h"
+п»ї#include "String.h"
 
 
 String::String() {
@@ -132,7 +132,7 @@ int String::Get_length() {
 
 void String::writeToFile()
 {
-    std::ofstream outputFile("out.txt", 'w'); // Используем флаг ios::app
+    std::ofstream outputFile("out.txt", 'w'); 
     if (outputFile.is_open()) {
         outputFile << this->str;
         outputFile.close();
@@ -148,6 +148,11 @@ void String::print()
         std::cout << str[i];
     }
     std::cout << std::endl;
+}
+
+void String::set_length(int len)
+{
+    length = len;
 }
 
 char& String::operator[](int indx)

@@ -1,34 +1,34 @@
 #include <iostream>
+#include <chrono>
 #include "String.h"
 #include "Arifmetic_code.h"
 
+
 int main() {
 
- 
-    std::ifstream f_1("in_1.txt");
-    std::ifstream f_2("in_2.txt");
-    String s_1, s_2;
-    if (f_1.is_open() && f_2.is_open()) {
-        f_1 >> s_1;
-        f_2 >> s_2;
-    }
-    else {
-        std::cerr << "Failed to open one or both files" << std::endl;
-    }
-    
-    String S = "AAB";
-    Arifmetic_code a;
-    
-    a.get_text(S, S.Get_length());
-    a.encode_text();
-    String b = a.Get_encoded();
-    std::cout << b << std::endl;
-   // a.decode_text();
-    //String c = a.Get_decoded();
-    //std::cout << c << std::endl;
-    
- 
-    return 0;
+    const char* inputFile = "hey.txt"; 
+    const char* encodedFile = "encode.bin";
+    const char* decodedFile = "decoded.txt";
 
+    Arifmetic_code a;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    a.encodeAndWriteToFile(inputFile, encodedFile);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    
+    std::chrono::duration<double> duration = end - start;
+    std::cout << "Duration of encoding: " << duration.count() << "seconds" << std::endl;
+
+    auto start_1 = std::chrono::high_resolution_clock::now();
+
+    a.decodeAndWriteToFile(encodedFile, decodedFile);
+    
+    auto end_1 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> duration_1 = end_1 - start_1;
+    std::cout << "Duration of decoding: " << duration_1.count() << "seconds" << std::endl;
+    return 0;
 }
-//0110 0111 0100 1010 1011
+
